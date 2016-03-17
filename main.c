@@ -79,6 +79,18 @@ enum enum_total_elements
     TOTAL_BULLETS = 5,
     TOTAL_ENEMYS = 4
 };
+enum enum_first_tile_sprite
+{
+    TILE_COWBOY = 0,
+    TILE_ENEMY = 4,
+    TILE_LETTER = 8,
+    TILE_BULLET = 24
+};
+enum enum_sprite_letter
+{
+    SPRITE_LETTER = 10,
+    SPRITE_BULLET = 26
+};
 
 typedef struct
 {
@@ -97,6 +109,7 @@ typedef struct
     BOOLEAN isAlive_;
     BOOLEAN isOnScreen_;
     UINT8 numSprite_;
+    UINT8 numTile_;
     UINT8 currentFrame_;
     UINT16 timeToChangeFrame_;
 } Sprite;
@@ -184,6 +197,7 @@ int main() {
     sprite[SPRITE_COWBOY].isAlive_ = 1;
     sprite[SPRITE_COWBOY].isOnScreen_ = 1;
     sprite[SPRITE_COWBOY].numSprite_ = 0;
+    sprite[SPRITE_COWBOY].numTile_ = TILE_COWBOY;
     sprite[SPRITE_COWBOY].currentFrame_ = 0;
     sprite[SPRITE_COWBOY].timeToChangeFrame_ = 7;
     
@@ -203,7 +217,8 @@ int main() {
         sprite[SPRITE_ENEMY1 + i].y_ = random;
         sprite[SPRITE_ENEMY1 + i].isAlive_ = 1;
         sprite[SPRITE_ENEMY1 + i].isOnScreen_ = 1;
-        sprite[SPRITE_ENEMY1 + i].numSprite_ = 4 + (4*i);
+        sprite[SPRITE_ENEMY1 + i].numSprite_ = 2 + (2*i);
+        sprite[SPRITE_ENEMY1 + i].numTile_ = TILE_ENEMY;
         sprite[SPRITE_ENEMY1 + i].currentFrame_ = 0;
         sprite[SPRITE_ENEMY1 + i].timeToChangeFrame_ = 7;
     }
@@ -269,8 +284,8 @@ int main() {
                 }
                 if (bulletPlayer[0].isAlive_)
                 {
-                    bulletPlayer[0].x_ += 1;
-                    Kmove_sprite(36, bulletPlayer[0].x_, bulletPlayer[0].y_);
+                    bulletPlayer[0].x_ += 2;
+                    Kmove_sprite(SPRITE_BULLET, bulletPlayer[0].x_, bulletPlayer[0].y_);
                 }
                 if (bulletPlayer[0].x_ > 168)
                 {
@@ -391,8 +406,8 @@ void move_sprite_to(UINT8 numSprite_, UINT8 x_, UINT8 y_)
     
     Kscroll_sprite(numSprite_, x_, y_);
     Kscroll_sprite(numSprite_ + 1, x_, y_);
-    Kscroll_sprite(numSprite_ + 2, x_, y_);
-    Kscroll_sprite(numSprite_ + 3, x_, y_);
+    //Kscroll_sprite(numSprite_ + 2, x_, y_);
+    //Kscroll_sprite(numSprite_ + 3, x_, y_);
     
     sprite[numSprite_].x_ += x_;
     sprite[numSprite_].y_ += y_;
@@ -400,22 +415,29 @@ void move_sprite_to(UINT8 numSprite_, UINT8 x_, UINT8 y_)
 
 void draw_sprite(UINT8 numSprite_, UINT8 x_, UINT8 y_)
 {
+    int i = 0;
     if (frame == 0)
     {
-        Kmove_sprite(numSprite_, x_, y_);
-        Kmove_sprite(numSprite_ + 1, x_, y_ + 8);
-        
-        Kmove_sprite(numSprite_ + 2, -50, -50);
-        Kmove_sprite(numSprite_ + 3, -50, -50);
+        Kset_sprite_tile(sprite[SPRITE_COWBOY].numSprite_, TILE_COWBOY);
+        Kset_sprite_tile(sprite[SPRITE_COWBOY].numSprite_ + 1, TILE_COWBOY + 1);
+        for (i = 0; i < TOTAL_ENEMYS; i++)
+        {
+            Kset_sprite_tile(sprite[SPRITE_ENEMY1].numSprite_ + (2 * i), TILE_ENEMY);
+            Kset_sprite_tile(sprite[SPRITE_ENEMY1].numSprite_ + 1 + (2 * i) , TILE_ENEMY + 1);
+        }
     }
     else
     {
-        Kmove_sprite(numSprite_ + 2, x_, y_);
-        Kmove_sprite(numSprite_ + 3, x_, y_ + 8);
-        
-        Kmove_sprite(numSprite_, -50, -50);
-        Kmove_sprite(numSprite_ + 1, -50, -50);
+        Kset_sprite_tile(sprite[SPRITE_COWBOY].numSprite_, TILE_COWBOY + 2);
+        Kset_sprite_tile(sprite[SPRITE_COWBOY].numSprite_ + 1, TILE_COWBOY + 3);
+        for (i = 0; i < TOTAL_ENEMYS; i++)
+        {
+            Kset_sprite_tile(sprite[SPRITE_ENEMY1].numSprite_ + (2 * i), TILE_ENEMY + 2);
+            Kset_sprite_tile(sprite[SPRITE_ENEMY1].numSprite_ + 1 + (2 * i) , TILE_ENEMY + 3);
+        }
     }
+    Kmove_sprite(numSprite_, x_, y_);
+    Kmove_sprite(numSprite_ + 1, x_, y_ + 8);
 }
 
 void update_sprite()
@@ -439,34 +461,34 @@ UINT8 print_number(UINT8 number_)
     switch(number_)
     {
         case 0:
-            return 26;
+            return SPRITE_LETTER + 6;
             break;
         case 1:
-            return 27;
+            return SPRITE_LETTER + 7;
             break;
         case 2:
-            return 28;
+            return SPRITE_LETTER + 8;
             break;
         case 3:
-            return 29;
+            return SPRITE_LETTER + 9;
             break;
         case 4:
-            return 30;
+            return SPRITE_LETTER + 10;
             break;
         case 5:
-            return 31;
+            return SPRITE_LETTER + 11;
             break;
         case 6:
-            return 32;
+            return SPRITE_LETTER + 12;
             break;
         case 7:
-            return 33;
+            return SPRITE_LETTER + 13;
             break;
         case 8:
-            return 34;
+            return SPRITE_LETTER + 14;
             break;
         case 9:
-            return 35;
+            return SPRITE_LETTER + 15;
             break;
     }
 }
@@ -477,38 +499,34 @@ void load_sprites_data()
     Kset_sprite_data(0, TOTAL_SPRITES_TILES_8X8, sprites);
     
     //Sprites.
-    Kset_sprite_tile(sprite[SPRITE_COWBOY].numSprite_, 0);
-    Kset_sprite_tile(sprite[SPRITE_COWBOY].numSprite_ + 1, 1);
-    Kset_sprite_tile(sprite[SPRITE_COWBOY].numSprite_ + 2, 2);
-    Kset_sprite_tile(sprite[SPRITE_COWBOY].numSprite_ + 3, 3);
+    Kset_sprite_tile(sprite[SPRITE_COWBOY].numSprite_, TILE_COWBOY);
+    Kset_sprite_tile(sprite[SPRITE_COWBOY].numSprite_ + 1, TILE_COWBOY + 1);
     
     for (i = 0; i < TOTAL_ENEMYS; i++)
     {
-        Kset_sprite_tile(sprite[SPRITE_ENEMY1 + i].numSprite_, 4);
-        Kset_sprite_tile(sprite[SPRITE_ENEMY1 + i].numSprite_ + 1, 5);
-        Kset_sprite_tile(sprite[SPRITE_ENEMY1 + i].numSprite_ + 2, 6);
-        Kset_sprite_tile(sprite[SPRITE_ENEMY1 + i].numSprite_ + 3, 7);
+        Kset_sprite_tile(sprite[SPRITE_ENEMY1 + i].numSprite_, TILE_COWBOY);
+        Kset_sprite_tile(sprite[SPRITE_ENEMY1 + i].numSprite_ + 1, TILE_COWBOY + 1);
     }
     
     //Fonts.
     for (i = 0; i < 16; i++)
     {
-        Kset_sprite_tile(20 + i, 8 + i);
+        Kset_sprite_tile(SPRITE_LETTER + i, TILE_LETTER + i);
     }
     
     //Bullet.
-    Kset_sprite_tile(36, 24);
+    Kset_sprite_tile(SPRITE_BULLET, TILE_BULLET);
 }
 
 void paint_points()
 {
     //Text.
-    Kmove_sprite(20, pointsX, pointsY);
-    Kmove_sprite(21, pointsX + 8, pointsY);
-    Kmove_sprite(22, pointsX + 16, pointsY);
-    Kmove_sprite(23, pointsX + 24 , pointsY);
-    Kmove_sprite(24, pointsX + 32, pointsY);
-    Kmove_sprite(25, pointsX + 40, pointsY);
+    Kmove_sprite(SPRITE_LETTER, pointsX, pointsY);
+    Kmove_sprite(SPRITE_LETTER + 1, pointsX + 8, pointsY);
+    Kmove_sprite(SPRITE_LETTER + 2, pointsX + 16, pointsY);
+    Kmove_sprite(SPRITE_LETTER + 3, pointsX + 24 , pointsY);
+    Kmove_sprite(SPRITE_LETTER + 4, pointsX + 32, pointsY);
+    Kmove_sprite(SPRITE_LETTER + 5, pointsX + 40, pointsY);
     //Numbers.
     Kmove_sprite(print_number(pointsDigit1), pointsX + 56, pointsY);
     Kmove_sprite(print_number(pointsDigit2), pointsX + 64, pointsY);

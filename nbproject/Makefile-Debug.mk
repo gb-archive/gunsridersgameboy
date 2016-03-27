@@ -37,6 +37,7 @@ OBJECTDIR=${CND_BUILDDIR}/${CND_CONF}/${CND_PLATFORM}
 OBJECTFILES= \
 	${OBJECTDIR}/_ext/e1eeb976/K.o \
 	${OBJECTDIR}/_ext/e1eeb976/gfx.o \
+	${OBJECTDIR}/_ext/e1eeb976/music.o \
 	${OBJECTDIR}/main.o
 
 
@@ -73,6 +74,11 @@ ${OBJECTDIR}/_ext/e1eeb976/gfx.o: /C/C++/GameBoy/gfx.c
 	${MKDIR} -p ${OBJECTDIR}/_ext/e1eeb976
 	${RM} "$@.d"
 	$(COMPILE.c) -g -I/C/gbdk/include -include /C/gbdk/include/gb -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/e1eeb976/gfx.o /C/C++/GameBoy/gfx.c
+
+${OBJECTDIR}/_ext/e1eeb976/music.o: /C/C++/GameBoy/music.c 
+	${MKDIR} -p ${OBJECTDIR}/_ext/e1eeb976
+	${RM} "$@.d"
+	$(COMPILE.c) -g -I/C/gbdk/include -include /C/gbdk/include/gb -MMD -MP -MF "$@.d" -o ${OBJECTDIR}/_ext/e1eeb976/music.o /C/C++/GameBoy/music.c
 
 ${OBJECTDIR}/main.o: main.c 
 	${MKDIR} -p ${OBJECTDIR}

@@ -15,6 +15,7 @@
       <itemPath>C:/C++/GameBoy/K.c</itemPath>
       <itemPath>C:/C++/GameBoy/gfx.c</itemPath>
       <itemPath>main.c</itemPath>
+      <itemPath>C:/C++/GameBoy/music.c</itemPath>
     </logicalFolder>
     <logicalFolder name="TestFiles"
                    displayName="Test Files"
@@ -62,6 +63,8 @@
       </item>
       <item path="C:/C++/GameBoy/gfx.c" ex="false" tool="0" flavor2="0">
       </item>
+      <item path="C:/C++/GameBoy/music.c" ex="false" tool="0" flavor2="0">
+      </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>
     </conf>
@@ -88,6 +91,8 @@
       <item path="C:/C++/GameBoy/K.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="C:/C++/GameBoy/gfx.c" ex="false" tool="0" flavor2="0">
+      </item>
+      <item path="C:/C++/GameBoy/music.c" ex="false" tool="0" flavor2="0">
       </item>
       <item path="main.c" ex="false" tool="0" flavor2="0">
       </item>

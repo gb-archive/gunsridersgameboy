@@ -133,9 +133,7 @@ const unsigned char background_map[] = {
     32,0,12,13,37,45,46,47,0,32,34,12,13,0,0,0,0,36,0,12,13,0,12,13,0,0,45,46,47,0,48,49
 };
 
-const unsigned char menuClear[] = {
-    49
-};
+const unsigned char menuClear = 49;
 
 const unsigned char gunsriders_map[] = {
     39, 40, 41, 42, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 49, 12, 13, 14,

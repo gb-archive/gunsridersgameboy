@@ -69,6 +69,7 @@ enum enum_state {
     GAME_OVER
 } state;
 
+//Enum of sprites only for player and enemies.
 enum enum_sprites {
     SPRITE_COWBOY,
     SPRITE_ENEMY1,
@@ -95,7 +96,8 @@ enum enum_first_tile_sprite {
 
 enum enum_sprite_letter {
     SPRITE_LETTER = 10,
-    SPRITE_BULLET = 26
+    SPRITE_BULLET = 26,
+    SPRITE_BULLET_ENEMY = 32
 };
 
 typedef struct {
@@ -106,7 +108,7 @@ typedef struct {
     BOOLEAN isRightMove_;
 } Bullet;
 Bullet bulletPlayer[TOTAL_BULLETS];
-Bullet bulletEnemy[TOTAL_BULLETS];
+Bullet bulletEnemy[TOTAL_ENEMYS];
 
 typedef struct {
     UINT8 x_;
@@ -119,6 +121,9 @@ typedef struct {
     UINT16 timeToChangeFrame_;
     UINT8 timeToCheckCollision_;
     UINT8 timeDeadReset_;
+    UINT8 movingTo_;
+    UINT8 timeToShoot_;
+    UINT8 clockToShoot_;
 } Sprite;
 Sprite sprite[TOTAL_SPRITES];
 
@@ -134,6 +139,10 @@ void update_sprite();
 
 UINT8 get_random_y();
 
+UINT8 get_random_direction();
+
+UINT8 get_random_time_to_shoot();
+
 UINT8 print_number(UINT8 number_);
 
 void load_sprites_data();
@@ -144,11 +153,17 @@ void load_tiles_menu();
 
 void paint_points();
 
+void add_points();
+
 void sound_init();
 
 void sound_shoot();
 
 void sound_dead_enemy();
+
+void start_shoot_enemy(UINT8 numBullet_);
+
+void reset_shoot_enemy(UINT8 numBullet_);
 
 //Global variables. Dont use ints. Use UINT8 instead.
 UINT8 clock;
@@ -185,6 +200,14 @@ int main() {
     UINT8 totalTimePauseShoot = 15;
     UINT8 totalTimeCheclCollision = 2;
     UINT8 timeDeadEnemyReset = 20;
+    BOOLEAN keyRelease = TRUE;
+    
+    UINT8 timeToNewEnemy = 150;
+    UINT8 clockToNewEnemy = 0;
+    UINT8 countEnemey = 0;
+    UINT8 clockToChangeDirection = 60;
+    UINT8 counterToChangeDirection = 0;
+    BOOLEAN isTimeToChangeDirection = FALSE;
 
     clock = 0;
     clock2 = 0;
@@ -197,21 +220,25 @@ int main() {
     pointsX = 48;
     pointsY = 20;
     pointsDigit1 = 0;
-    pointsDigit2 = 5;
-    pointsDigit3 = 8;
+    pointsDigit2 = 0;
+    pointsDigit3 = 0;
     countBulletPlayer = 1;
     countBulletEnemy = 0;
 
-    for (i = 0; i < TOTAL_BULLETS; i++) {
+    for (i = 0; i < TOTAL_BULLETS; i++)
+    {
         bulletPlayer[i].isAlive_ = FALSE;
         bulletPlayer[i].isRightMove_ = FALSE;
         bulletPlayer[i].isReadyToMove_ = FALSE;
         bulletPlayer[i].x_ = 20;
         bulletPlayer[i].y_ = 20;
-
-        bulletEnemy[i].isAlive_ = FALSE;
+    }
+    for (i = 0; i < TOTAL_ENEMYS; i++)
+    {
+        bulletEnemy[i].isAlive_ = TRUE;
         bulletEnemy[i].isRightMove_ = TRUE;
-        bulletEnemy[i].x_ = 20;
+        bulletEnemy[i].isReadyToMove_ = FALSE;
+        bulletEnemy[i].x_ = K_WIDTH;
         bulletEnemy[i].y_ = 20;
     }
 
@@ -219,24 +246,30 @@ int main() {
     sprite[SPRITE_COWBOY].x_ = 40;
     sprite[SPRITE_COWBOY].y_ = 80;
     sprite[SPRITE_COWBOY].isAlive_ = TRUE;
-    sprite[SPRITE_COWBOY].isOnScreen_ = TRUE;
+    sprite[SPRITE_COWBOY].isOnScreen_ = FALSE;
     sprite[SPRITE_COWBOY].numSprite_ = 0;
     sprite[SPRITE_COWBOY].numTile_ = TILE_COWBOY;
     sprite[SPRITE_COWBOY].currentFrame_ = 0;
     sprite[SPRITE_COWBOY].timeToChangeFrame_ = 7;
+    sprite[SPRITE_COWBOY].movingTo_ = 1;
+    sprite[SPRITE_COWBOY].timeToShoot_ = 0;
+    sprite[SPRITE_COWBOY].clockToShoot_ = 0;
 
     //Enemy
     for (i = 0; i < TOTAL_ENEMYS; i++) {
         sprite[SPRITE_ENEMY1 + i].x_ = K_WIDTH + (i * 25);
         sprite[SPRITE_ENEMY1 + i].y_ = get_random_y();
         sprite[SPRITE_ENEMY1 + i].isAlive_ = TRUE;
-        sprite[SPRITE_ENEMY1 + i].isOnScreen_ = TRUE;
+        sprite[SPRITE_ENEMY1 + i].isOnScreen_ = FALSE;
         sprite[SPRITE_ENEMY1 + i].numSprite_ = 2 + (2 * i);
         sprite[SPRITE_ENEMY1 + i].numTile_ = TILE_ENEMY;
         sprite[SPRITE_ENEMY1 + i].currentFrame_ = 0;
         sprite[SPRITE_ENEMY1 + i].timeToChangeFrame_ = 7;
         sprite[SPRITE_ENEMY1 + i].timeToCheckCollision_ = 0;
         sprite[SPRITE_ENEMY1 + i].timeDeadReset_ = 0;
+        sprite[SPRITE_ENEMY1 + i].movingTo_ = 1;
+        sprite[SPRITE_ENEMY1 + i].timeToShoot_ = 100;
+        sprite[SPRITE_ENEMY1 + i].clockToShoot_ = 0;
     }
 
     SPRITES_8x8;
@@ -325,13 +358,35 @@ int main() {
                         bulletPlayer[i].x_ += 2;
                         Kmove_sprite(SPRITE_BULLET + i, bulletPlayer[i].x_, bulletPlayer[i].y_);
                     }
-                    if (bulletPlayer[i].x_ > 165)
+                    if (bulletPlayer[i].x_ > 165 && bulletPlayer[i].isReadyToMove_)
                     {
                         bulletPlayer[i].x_ = -10;
                         bulletPlayer[i].isAlive_ = FALSE;
                         bulletPlayer[i].isReadyToMove_ = FALSE;
                     }
-                }// </editor-fold>
+                }
+                //Bullets enemy.
+                for (i = 0; i < TOTAL_ENEMYS; i++)
+                {
+                    bulletEnemy[i].x_-=2;
+                    if (bulletEnemy[i].isAlive_)
+                    {
+                        if (!bulletEnemy[i].isReadyToMove_)
+                        {
+                            bulletEnemy[i].x_ = sprite[SPRITE_ENEMY1 + i].x_ + 4;
+                            bulletEnemy[i].y_ = sprite[SPRITE_ENEMY1 + i].y_ + 7;
+                            bulletEnemy[i].isReadyToMove_ = TRUE;
+                        }
+                        Kmove_sprite(SPRITE_BULLET_ENEMY + i, bulletEnemy[i].x_, bulletEnemy[i].y_);
+                    }
+                    if (bulletEnemy[i].x_ < 1 && bulletEnemy[i].isReadyToMove_ || bulletEnemy[i].x_ > K_WIDTH)
+                    {
+                        bulletEnemy[i].x_ = K_WIDTH + 10;
+                        bulletEnemy[i].isReadyToMove_ = FALSE;
+                        bulletEnemy[i].isAlive_ = FALSE;
+                    }
+                }
+                // </editor-fold>
 
                 // <editor-fold defaultstate="collapsed" desc="SCROLL">
                 //////////
@@ -361,41 +416,103 @@ int main() {
                 tempy = sprite[SPRITE_COWBOY].y_;
                 draw_sprite_conwboy(sprite[SPRITE_COWBOY].numSprite_, tempx, tempy);
 
+                //This check when appear a new enemy.
+                clockToNewEnemy++;
+                if (clockToNewEnemy > timeToNewEnemy)
+                {
+                    if (timeToNewEnemy > 80)
+                    {
+                        timeToNewEnemy -= 5;
+                    }
+                    else
+                    {
+                        timeToMoveEnemy = 1;
+                    }
+                    clockToNewEnemy = 0;
+                    countEnemey++;
+                    if (countEnemey > TOTAL_ENEMYS)
+                    {
+                        countEnemey = 0;
+                    }
+                    sprite[countEnemey].isOnScreen_ = TRUE;
+                }
+                
+                counterToChangeDirection++;
+                if (counterToChangeDirection > clockToChangeDirection)
+                {
+                    counterToChangeDirection = 0;
+                    isTimeToChangeDirection = TRUE;
+                }
                 for (i = 0; i < TOTAL_ENEMYS; i++)
                 {   
-                    if (sprite[SPRITE_ENEMY1 + i].isAlive_)
+                    if (sprite[SPRITE_ENEMY1 + i].isOnScreen_)
                     {
-                        if (speedEnemy == 1)
+                        if (sprite[SPRITE_ENEMY1 + i].isAlive_)
                         {
-                            sprite[SPRITE_ENEMY1 + i].x_ -= speedEnemy;
-                            tempx = sprite[SPRITE_ENEMY1 + i].x_;
-                            tempy = sprite[SPRITE_ENEMY1 + i].y_;
-                            draw_sprite_enemy(sprite[SPRITE_ENEMY1 + i].numSprite_, tempx, tempy); 
-                            /////////////////////////
-                            //COLLISION WITH BULLET//
-                            /////////////////////////
-                            sprite[SPRITE_ENEMY1 + i].timeToCheckCollision_++;
-                            if (sprite[SPRITE_ENEMY1 + i].timeToCheckCollision_ > totalTimeCheclCollision)
+                            if (!bulletEnemy[i].isAlive_)
                             {
-                                sprite[SPRITE_ENEMY1 + i].timeToCheckCollision_ = 0;
-                                for (j = 0; j < TOTAL_BULLETS; j++)
+                                sprite[SPRITE_ENEMY1 + i].clockToShoot_++;
+                            }
+                            if (sprite[SPRITE_ENEMY1 + i].clockToShoot_ > sprite[SPRITE_ENEMY1 + i].timeToShoot_)
+                            {
+                                bulletEnemy[i].isAlive_ = TRUE;
+                                sprite[SPRITE_ENEMY1 + i].clockToShoot_ = 0;
+                            }
+                            if (isTimeToChangeDirection)
+                            {
+                                sprite[SPRITE_ENEMY1 + i].movingTo_ = get_random_direction();
+                            }
+                            if (speedEnemy == 1)
+                            {
+                                switch (sprite[SPRITE_ENEMY1 + i].movingTo_)
                                 {
-                                    if (bulletPlayer[j].isAlive_)
-                                    {
-                                        if (bulletPlayer[j].x_ > tempx - 16)
+                                    case 0:
+                                        sprite[SPRITE_ENEMY1 + i].x_ -= speedEnemy;
+                                        break;
+                                    case 1:
+                                        sprite[SPRITE_ENEMY1 + i].x_ -= speedEnemy;
+                                        if (sprite[SPRITE_ENEMY1 + i].y_ > K_LIMIT_UP)
                                         {
-                                            if (bulletPlayer[j].x_ < tempx + 8)
+                                            sprite[SPRITE_ENEMY1 + i].y_ -= speedEnemy;
+                                        }
+                                        break;
+                                    case 2:
+                                        sprite[SPRITE_ENEMY1 + i].x_ -= speedEnemy;
+                                        if (sprite[SPRITE_ENEMY1 + i].y_ < K_LIMIT_DOWN)
+                                        {
+                                            sprite[SPRITE_ENEMY1 + i].y_ += speedEnemy;
+                                        }
+                                        break;
+                                }
+                                tempx = sprite[SPRITE_ENEMY1 + i].x_;
+                                tempy = sprite[SPRITE_ENEMY1 + i].y_;
+                                draw_sprite_enemy(sprite[SPRITE_ENEMY1 + i].numSprite_, tempx, tempy); 
+                                /////////////////////////
+                                //COLLISION WITH BULLET//
+                                /////////////////////////
+                                sprite[SPRITE_ENEMY1 + i].timeToCheckCollision_++;
+                                if (sprite[SPRITE_ENEMY1 + i].timeToCheckCollision_ > totalTimeCheclCollision)
+                                {
+                                    sprite[SPRITE_ENEMY1 + i].timeToCheckCollision_ = 0;
+                                    for (j = 0; j < TOTAL_BULLETS; j++)
+                                    {
+                                        if (bulletPlayer[j].isAlive_)
+                                        {
+                                            if (bulletPlayer[j].x_ > tempx - 16)
                                             {
-                                                if (bulletPlayer[j].y_ > tempy - 1)
+                                                if (bulletPlayer[j].x_ < tempx + 8)
                                                 {
-                                                    if (bulletPlayer[j].y_ < tempy + 16)
+                                                    if (bulletPlayer[j].y_ > tempy - 1)
                                                     {
-                                                        //sprite[SPRITE_ENEMY1 + i].x_ = 170;
-                                                        sprite[SPRITE_ENEMY1 + i].isAlive_ = FALSE;
-                                                        bulletPlayer[j].isAlive_ = FALSE;
-                                                        bulletPlayer[j].isReadyToMove_ = FALSE;
-                                                        Kmove_sprite(SPRITE_BULLET + j, -10, -10);
-                                                        sound_dead_enemy();
+                                                        if (bulletPlayer[j].y_ < tempy + 16)
+                                                        {
+                                                            sprite[SPRITE_ENEMY1 + i].isAlive_ = FALSE;
+                                                            bulletPlayer[j].isAlive_ = FALSE;
+                                                            bulletPlayer[j].isReadyToMove_ = FALSE;
+                                                            Kmove_sprite(SPRITE_BULLET + j, -10, -10);
+                                                            sound_dead_enemy();
+                                                            add_points();
+                                                        }
                                                     }
                                                 }
                                             }
@@ -404,25 +521,51 @@ int main() {
                                 }
                             }
                         }
+                        else
+                        //The enemy is laying dead on the floor.
+                        {
+                            sprite[SPRITE_ENEMY1 + i].x_ -= scroll;
+                            tempx = sprite[SPRITE_ENEMY1 + i].x_;
+                            tempy = sprite[SPRITE_ENEMY1 + i].y_;
+                            draw_sprite_enemy_dead(sprite[SPRITE_ENEMY1 + i].numSprite_, tempx, tempy);
+
+                            sprite[SPRITE_ENEMY1 + i].timeDeadReset_++;
+                            if (sprite[SPRITE_ENEMY1 + i].timeDeadReset_ > timeDeadEnemyReset)
+                            {
+                                sprite[SPRITE_ENEMY1 + i].timeDeadReset_ = 0;
+                                //Reset enemy.
+                                sprite[SPRITE_ENEMY1 + i].x_ = 170;
+                                sprite[SPRITE_ENEMY1 + i].y_ = get_random_y();
+                                sprite[SPRITE_ENEMY1 + i].isAlive_ = TRUE;
+                                sprite[SPRITE_ENEMY1 + i].isOnScreen_ = FALSE;
+                            }
+                        }
                     }
                     else
                     {
-                        sprite[SPRITE_ENEMY1 + i].x_ -= scroll;
+                        sprite[SPRITE_ENEMY1 + i].x_ = 170;
                         tempx = sprite[SPRITE_ENEMY1 + i].x_;
                         tempy = sprite[SPRITE_ENEMY1 + i].y_;
-                        draw_sprite_enemy_dead(sprite[SPRITE_ENEMY1 + i].numSprite_, tempx, tempy);
-                        
-                        sprite[SPRITE_ENEMY1 + i].timeDeadReset_++;
-                        if (sprite[SPRITE_ENEMY1 + i].timeDeadReset_ > timeDeadEnemyReset)
-                        {
-                            sprite[SPRITE_ENEMY1 + i].timeDeadReset_ = 0;
-                            //Reset enemy.
-                            sprite[SPRITE_ENEMY1 + i].x_ = 170;
-                            sprite[SPRITE_ENEMY1 + i].y_ = get_random_y();
-                            sprite[SPRITE_ENEMY1 + i].isAlive_ = TRUE;
-                        }
+                        draw_sprite_enemy(sprite[SPRITE_ENEMY1 + i].numSprite_, tempx, tempy);
+                    }
+                    //Enemy is out of screen.
+                    if (sprite[SPRITE_ENEMY1 + i].x_ < 1)
+                    {
+                        sprite[SPRITE_ENEMY1 + i].timeDeadReset_ = 0;
+                        //Reset enemy.
+                        sprite[SPRITE_ENEMY1 + i].x_ = 170;
+                        sprite[SPRITE_ENEMY1 + i].y_ = get_random_y();
+                        sprite[SPRITE_ENEMY1 + i].isAlive_ = TRUE;
+                        sprite[SPRITE_ENEMY1 + i].isOnScreen_ = FALSE;
+                        //Reset bullet.
+                        bulletEnemy[i].isAlive_ = TRUE;
+                        bulletEnemy[i].isReadyToMove_ = FALSE;
+                        sprite[SPRITE_ENEMY1 + i].timeToShoot_ = 100;
+                        Kmove_sprite(SPRITE_BULLET_ENEMY + i, bulletEnemy[i].x_, bulletEnemy[i].y_);
+                        //sound_dead_enemy();
                     }
                 }
+                isTimeToChangeDirection = FALSE;
                 // </editor-fold>
 
                 ///////
@@ -449,7 +592,8 @@ int main() {
                 if (keys & (J_DOWN)) {
                     moveUpDown = 1;
                 }
-                if (keys & (J_A) /*&& !bulletPlayer[1].isAlive_*/) {
+                if (keys & (J_A) && keyRelease) {
+                    keyRelease = FALSE;
                     if (isPossibleToShoot)
                     {
                         isPossibleToShoot = FALSE;
@@ -461,6 +605,10 @@ int main() {
                             countBulletPlayer = 1;
                         }
                     }
+                }
+                if (!( keys & J_A ))
+                {
+                    keyRelease = TRUE;
                 }
                 if (keys) {
                     move_sprite_to(sprite[SPRITE_COWBOY].numSprite_, moveLeftRight, moveUpDown);
@@ -561,39 +709,62 @@ UINT8 get_random_y()
     return random + K_LIMIT_UP;
 }
 
+UINT8 get_random_direction()
+{
+    UINT8 direction = Krand();
+    
+    while (direction > 2)
+    {
+        direction = Krand();
+    }
+    
+    return direction;
+}
+
+UINT8 get_random_time_to_shoot()
+{
+    UINT8 time = Krand();
+    
+    while (time > 100)
+    {
+        time = Krand();
+    }
+    return time;
+}
+
 UINT8 print_number(UINT8 number_)
 {
     switch(number_)
     {
         case 0:
-            return SPRITE_LETTER + 6;
+            return SPRITE_LETTER + 4;
             break;
         case 1:
-            return SPRITE_LETTER + 7;
+            return SPRITE_LETTER + 5;
             break;
         case 2:
-            return SPRITE_LETTER + 8;
+            return SPRITE_LETTER + 6;
             break;
         case 3:
-            return SPRITE_LETTER + 9;
+            return SPRITE_LETTER + 7;
             break;
         case 4:
-            return SPRITE_LETTER + 10;
+            return SPRITE_LETTER + 8;
             break;
         case 5:
-            return SPRITE_LETTER + 11;
+            return SPRITE_LETTER + 9;
             break;
         case 6:
-            return SPRITE_LETTER + 12;
+            return SPRITE_LETTER + 10;
             break;
         case 7:
-            return SPRITE_LETTER + 13;
+            return SPRITE_LETTER + 11;
             break;
         case 8:
-            return SPRITE_LETTER + 14;
+            return SPRITE_LETTER + 12;
             break;
         case 9:
-            return SPRITE_LETTER + 15;
+            return SPRITE_LETTER + 13;
             break;
     }
 }
@@ -618,11 +789,20 @@ void load_sprites_data()
     {
         Kset_sprite_tile(SPRITE_LETTER + i, TILE_LETTER + i);
     }
+    Kset_sprite_tile(SPRITE_LETTER + 6, print_number(pointsDigit1));
+    Kset_sprite_tile(SPRITE_LETTER + 7, print_number(pointsDigit2));
+    Kset_sprite_tile(SPRITE_LETTER + 8, print_number(pointsDigit3));
     
-    //Bullet.
+    //Bullets of player.
     for (i = 0; i < TOTAL_BULLETS; i++)
     {
         Kset_sprite_tile(SPRITE_BULLET + i, TILE_BULLET);
+    }
+    
+    //Bullets of enemy.
+    for (i = 0; i < TOTAL_ENEMYS; i++)
+    {
+        Kset_sprite_tile(SPRITE_BULLET_ENEMY + i, TILE_BULLET);
     }
 }
 
@@ -636,9 +816,28 @@ void paint_points()
     Kmove_sprite(SPRITE_LETTER + 4, pointsX + 32, pointsY);
     Kmove_sprite(SPRITE_LETTER + 5, pointsX + 40, pointsY);
     //Numbers.
-    Kmove_sprite(print_number(pointsDigit1), pointsX + 56, pointsY);
-    Kmove_sprite(print_number(pointsDigit2), pointsX + 64, pointsY);
-    Kmove_sprite(print_number(pointsDigit3), pointsX + 72, pointsY);
+    Kmove_sprite(SPRITE_LETTER + 6, pointsX + 56, pointsY);
+    Kmove_sprite(SPRITE_LETTER + 7, pointsX + 64, pointsY);
+    Kmove_sprite(SPRITE_LETTER + 8, pointsX + 72, pointsY);
+}
+
+void add_points()
+{
+    pointsDigit3++;
+    if (pointsDigit3 > 9)
+    {
+        pointsDigit3 = 0;
+        pointsDigit2++;
+    }
+    if (pointsDigit2 > 9)
+    {
+        pointsDigit2 = 0;
+        pointsDigit1++;
+    }
+    
+    Kset_sprite_tile(SPRITE_LETTER + 6, print_number(pointsDigit1));
+    Kset_sprite_tile(SPRITE_LETTER + 7, print_number(pointsDigit2));
+    Kset_sprite_tile(SPRITE_LETTER + 8, print_number(pointsDigit3));
 }
 
 void load_tiles_game()
@@ -667,6 +866,18 @@ void load_tiles_menu()
     }
     
     Kset_bkg_tiles(0,0,20,18,gunsriders_map);
+}
+
+void reset_shoot_enemy(UINT8 numBullet_)
+{
+    bulletEnemy[numBullet_].isAlive_ = TRUE;
+    bulletEnemy[numBullet_].isReadyToMove_ = FALSE;
+    sprite[SPRITE_ENEMY1 + numBullet_].timeToShoot_ = 100;
+}
+
+void start_shoot_enemy(UINT8 numBullet_)
+{
+    
 }
 
 void sound_init()

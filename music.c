@@ -148,6 +148,11 @@ void setNote(note *n){
 		case SNARE:
 		break;
 		case CYMBAL:
+                    NR41_REG = 0x0FU;
+                    NR42_REG = 0xF3U;
+                    NR43_REG = 100;
+                    NR44_REG = 0xC0U;
+                    NR51_REG |= 0x88;
 		break;
 	}
 }

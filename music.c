@@ -50,6 +50,8 @@ typedef struct {
 //each channel should have its own array, so
 //that multiple notes can be played simultaneously
 note song_ch1[] = { //notes to be played on channel 1
+        {NONE, SILENCE, 0x00U},
+        {NONE, SILENCE, 0x00U},
 	{MELODY, E5, 0x84U},
         
         {NONE, SILENCE, 0x00U},
@@ -128,6 +130,24 @@ note song_ch1[] = { //notes to be played on channel 1
 */
 };
 
+note song_ch2[] = { //notes to be played on channel 1
+        {NONE, SILENCE, 0x00U},
+        {NONE, SILENCE, 0x00U},
+	{MELODY, C4, 0x84U},
+        {NONE, SILENCE, 0x00U},
+        {MELODY, E3, 0x84U},
+        {NONE, SILENCE, 0x00U},
+        {MELODY, D3, 0x84U},
+        {MELODY, D3, 0x84U},
+        {NONE, SILENCE, 0x00U},
+        {NONE, SILENCE, 0x00U},
+        {MELODY, F3, 0x84U},
+        {NONE, SILENCE, 0x00U},
+        {MELODY, D3, 0x84U},
+        {MELODY, C3, 0x84U},
+        {MELODY, C3, 0x84U},
+};
+
 //function to set sound registers based on notes chosen
 void setNote(note *n){
 	switch((*n).i){
@@ -159,22 +179,39 @@ void setNote(note *n){
 
 //This function plays whatever note is on
 //the current beat in Channel 1
-void playChannel1(){
+void playMusic1(){
 	setNote(&song_ch1[currentBeat]);
 	NR51_REG |= 0x11U; //enable sound on channel 1
 }
 
 //Timer function gets called 16 times a second
-void timerInterrupt(){
+void timerMusic1(){
 	if (timerCounter == 10){ //every 4 ticks is a beat, or 4 beats per second
 		timerCounter=0;
-		currentBeat = currentBeat == 50 ? 0 : currentBeat+1;
-		playChannel1(); //every beat, play the sound for that beat
+		currentBeat = currentBeat == 49 ? 0 : currentBeat+1;
+		playMusic1(); //every beat, play the sound for that beat
 		//playChannel2(); //make more functions to play sounds on 
 		//playChannel3(); the other channels
 		//playChannel4();
 	}
 	timerCounter++;
+}
+
+void playMusic2(){
+	setNote(&song_ch2[currentBeat]);
+	NR51_REG |= 0x11U; //enable sound on channel 1
+}
+
+void timerMusic2(){
+    if (currentBeat < 18)
+    {
+	if (timerCounter == 10){ //every 4 ticks is a beat, or 4 beats per second
+		timerCounter=0;
+		currentBeat = currentBeat == 18 ? 0 : currentBeat+1;
+		playMusic2(); //every beat, play the sound for that beat
+	}
+	timerCounter++;
+    }
 }
 
 /*To have more notes playing simultaneously, i'd need

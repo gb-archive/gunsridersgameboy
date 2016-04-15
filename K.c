@@ -84,14 +84,34 @@ void Kset_bkg_data(UINT8 first_tile, UINT8 nb_tiles, unsigned char *data)
     set_bkg_data(first_tile, nb_tiles, data);
 }
 
+void Kset_win_data(UINT8 first_tile, UINT8 nb_tiles, unsigned char *data)
+{
+    set_win_data(first_tile, nb_tiles, data);
+}
+
 void Kset_bkg_tiles(UINT8 x, UINT8 y, UINT8 w, UINT8 h, unsigned char *tiles)
 {
     set_bkg_tiles(x, y, w, h, tiles);
 }
 
+void Kset_win_tiles(UINT8 x, UINT8 y, UINT8 w, UINT8 h, unsigned char *tiles)
+{
+    set_win_tiles(x, y, w, h, tiles);
+}
+
 void Kscroll_bkg(INT8 x, INT8 y)
 {
     scroll_bkg(x, y);
+}
+
+void Kmove_bkg(INT8 x, INT8 y)
+{
+    move_bkg(x, y);
+}
+
+void Kmove_win(INT8 x, INT8 y)
+{
+    move_win(x, y);
 }
 
 UINT8 Krand()

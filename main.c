@@ -17,7 +17,7 @@
 #include <string.h>
 #include <rand.h>
 #include <stdlib.h>
-#include "K.c"
+#include "drawing.c"
 #include "gfx.c"
 #include "music.c"
 
@@ -26,8 +26,8 @@ enum limits_game
 {
     K_WIDTH = 160,
     K_HEIGHT = 144,
-    K_LIMIT_UP = 56,
-    K_LIMIT_DOWN = 128
+    K_LIMIT_UP = 40,
+    K_LIMIT_DOWN = 112
 };
 //This enum is to count the total tiles of sprites I must to load.
 enum sprites_tiles_8x8 {
@@ -171,7 +171,11 @@ void paint_game_over(UINT8 x_, UINT8 y_);
 
 void add_points();
 
+void update_hud();
+
 void sound_init();
+
+void sound_clean_noise();
 
 void sound_shoot();
 
@@ -189,7 +193,10 @@ UINT8 pointsDigit1;
 UINT8 pointsDigit2;
 UINT8 pointsDigit3;
 UINT8 countBulletPlayer;
-UINT8 countBulletEnemy; // </editor-fold>
+UINT8 countBulletEnemy;
+UINT8 HUDcountBullets;
+UINT8 HUDcountEnemysLess;
+// </editor-fold>
 
 int main() {
     
@@ -226,69 +233,6 @@ int main() {
     UINT8 counterToChangeDirection = 0;
     BOOLEAN isTimeToChangeDirection = FALSE;
 
-    clock = 0;
-    clock2 = 0;
-    frame = 0;
-    points[0] = 0;
-    points[1] = 0;
-    points[2] = 0;
-    moveUpDown = 0;
-    moveLeftRight = 0;
-    pointsX = 48;
-    pointsY = 20;
-    pointsDigit1 = 0;
-    pointsDigit2 = 0;
-    pointsDigit3 = 0;
-    countBulletPlayer = 1;
-    countBulletEnemy = 0;
-
-    for (i = 0; i < TOTAL_BULLETS; i++)
-    {
-        bulletPlayer[i].isAlive_ = FALSE;
-        bulletPlayer[i].isRightMove_ = FALSE;
-        bulletPlayer[i].isReadyToMove_ = FALSE;
-        bulletPlayer[i].x_ = 20;
-        bulletPlayer[i].y_ = 20;
-    }
-    for (i = 0; i < TOTAL_ENEMYS; i++)
-    {
-        bulletEnemy[i].isAlive_ = TRUE;
-        bulletEnemy[i].isRightMove_ = TRUE;
-        bulletEnemy[i].isReadyToMove_ = FALSE;
-        bulletEnemy[i].x_ = K_WIDTH + 10;
-        bulletEnemy[i].y_ = 20;
-    }
-
-    //Cowboy
-    sprite[SPRITE_COWBOY].x_ = 40;
-    sprite[SPRITE_COWBOY].y_ = 80;
-    sprite[SPRITE_COWBOY].isAlive_ = TRUE;
-    sprite[SPRITE_COWBOY].isOnScreen_ = FALSE;
-    sprite[SPRITE_COWBOY].numSprite_ = 0;
-    sprite[SPRITE_COWBOY].numTile_ = TILE_COWBOY;
-    sprite[SPRITE_COWBOY].currentFrame_ = 0;
-    sprite[SPRITE_COWBOY].timeToChangeFrame_ = 7;
-    sprite[SPRITE_COWBOY].movingTo_ = 1;
-    sprite[SPRITE_COWBOY].timeToShoot_ = 0;
-    sprite[SPRITE_COWBOY].clockToShoot_ = 0;
-
-    //Enemy
-    for (i = 0; i < TOTAL_ENEMYS; i++) {
-        sprite[SPRITE_ENEMY1 + i].x_ = K_WIDTH + (i * 25) + 10;
-        sprite[SPRITE_ENEMY1 + i].y_ = get_random_y();
-        sprite[SPRITE_ENEMY1 + i].isAlive_ = TRUE;
-        sprite[SPRITE_ENEMY1 + i].isOnScreen_ = FALSE;
-        sprite[SPRITE_ENEMY1 + i].numSprite_ = 2 + (2 * i);
-        sprite[SPRITE_ENEMY1 + i].numTile_ = TILE_ENEMY;
-        sprite[SPRITE_ENEMY1 + i].currentFrame_ = 0;
-        sprite[SPRITE_ENEMY1 + i].timeToChangeFrame_ = 7;
-        sprite[SPRITE_ENEMY1 + i].timeToCheckCollision_ = 0;
-        sprite[SPRITE_ENEMY1 + i].timeDeadReset_ = 0;
-        sprite[SPRITE_ENEMY1 + i].movingTo_ = 1;
-        sprite[SPRITE_ENEMY1 + i].timeToShoot_ = 100;
-        sprite[SPRITE_ENEMY1 + i].clockToShoot_ = 0;
-    }
-
     SPRITES_8x8;
 
     HIDE_BKG;
@@ -313,11 +257,12 @@ int main() {
                     isInited = TRUE;
                     timerCounter = 0; //Reset music.
                     currentBeat = 0;
-                    playMusic1(); //Active music.
+                    moreSpeed = 0;
                     SHOW_BKG;
                     HIDE_SPRITES;
+                    HIDE_WIN;
                 }
-                timerMusic1(); //Play the music.
+                updateMusicMenu(); //Play the music.
                 clock2++;
                 if (clock2 > 25) {
                     Kset_bkg_tiles(0,14,20,1,gunsriders_press_on);
@@ -330,6 +275,7 @@ int main() {
                 if (keys & (J_START)) {
                     HIDE_BKG;
                     HIDE_SPRITES;
+                    HIDE_WIN;
                     load_tiles_game();
                     state = GAME_PLAY;
                     isInited = FALSE;
@@ -342,6 +288,10 @@ int main() {
                 if (!isInited)
                 {
                     isInited = TRUE;
+                    
+                    timerCounter = 0; //Reset music.
+                    currentBeat = 0;
+                    
                     //TOCHACO!!!!
                     //Variables.
                     pointsDigit1 = 0;
@@ -394,7 +344,7 @@ int main() {
                         bulletPlayer[i].isRightMove_ = FALSE;
                         bulletPlayer[i].isReadyToMove_ = FALSE;
                         bulletPlayer[i].x_ = 20;
-                        bulletPlayer[i].y_ = 20;
+                        bulletPlayer[i].y_ = -100 + (10 * i);
                     }
                     for (i = 0; i < TOTAL_ENEMYS; i++)
                     {
@@ -402,7 +352,7 @@ int main() {
                         bulletEnemy[i].isRightMove_ = TRUE;
                         bulletEnemy[i].isReadyToMove_ = FALSE;
                         bulletEnemy[i].x_ = K_WIDTH + 10;
-                        bulletEnemy[i].y_ = 20;
+                        bulletEnemy[i].y_ = K_HEIGHT + (10 * i);
                     }
 
                     //Cowboy
@@ -450,6 +400,9 @@ int main() {
 
                     SHOW_SPRITES;
                     SHOW_BKG;
+                    SHOW_WIN;
+                    
+                    Kmove_win(7, K_HEIGHT - 16); //HUD
                 }
 
                 //////////
@@ -496,40 +449,47 @@ int main() {
                     //Bullets enemy.
                     for (i = 0; i < TOTAL_ENEMYS; i++)
                     {
-                        bulletEnemy[i].x_-= 2;
-                        Kmove_sprite(SPRITE_BULLET_ENEMY + i, bulletEnemy[i].x_, bulletEnemy[i].y_);
                         if (bulletEnemy[i].isAlive_)
                         {
-                            if (!bulletEnemy[i].isReadyToMove_)
-                            {
-                                bulletEnemy[i].x_ = sprite[SPRITE_ENEMY1 + i].x_;
-                                bulletEnemy[i].y_ = sprite[SPRITE_ENEMY1 + i].y_ + 7;
-                                bulletEnemy[i].isReadyToMove_ = TRUE;
-                            }
-                            //Collision with player.
-                            if (bulletEnemy[i].x_ < sprite[SPRITE_COWBOY].x_)
-                            {
-                                if (bulletEnemy[i].x_ > sprite[SPRITE_COWBOY].x_ - 8)
+                            bulletEnemy[i].x_-= 2;
+                            Kmove_sprite(SPRITE_BULLET_ENEMY + i, bulletEnemy[i].x_, bulletEnemy[i].y_);
+                            //if (bulletEnemy[i].isAlive_)
+                            //{
+                                if (!bulletEnemy[i].isReadyToMove_)
                                 {
-                                    if (bulletEnemy[i].y_ > sprite[SPRITE_COWBOY].y_)
+                                    bulletEnemy[i].x_ = sprite[SPRITE_ENEMY1 + i].x_;
+                                    bulletEnemy[i].y_ = sprite[SPRITE_ENEMY1 + i].y_ + 7;
+                                    bulletEnemy[i].isReadyToMove_ = TRUE;
+                                }
+                                //Collision with player.
+                                if (bulletEnemy[i].x_ < sprite[SPRITE_COWBOY].x_)
+                                {
+                                    if (bulletEnemy[i].x_ > sprite[SPRITE_COWBOY].x_ - 8)
                                     {
-                                        if (bulletEnemy[i].y_ < sprite[SPRITE_COWBOY].y_ + 16)
+                                        if (bulletEnemy[i].y_ > sprite[SPRITE_COWBOY].y_)
                                         {
-                                            sprite[SPRITE_COWBOY].isAlive_ = FALSE;
-                                            bulletEnemy[i].x_ = K_WIDTH + 10;
-                                            bulletEnemy[i].isReadyToMove_ = FALSE;
-                                            bulletEnemy[i].isAlive_ = FALSE;
-                                            sound_dead_player();
+                                            if (bulletEnemy[i].y_ < sprite[SPRITE_COWBOY].y_ + 16)
+                                            {
+                                                sprite[SPRITE_COWBOY].isAlive_ = FALSE;
+                                                bulletEnemy[i].x_ = K_WIDTH + 10;
+                                                bulletEnemy[i].y_ = K_HEIGHT + (10 * i);
+                                                bulletEnemy[i].isReadyToMove_ = FALSE;
+                                                bulletEnemy[i].isAlive_ = FALSE;
+                                                Kmove_sprite(SPRITE_BULLET_ENEMY + i, bulletEnemy[i].x_, bulletEnemy[i].y_);
+                                                sound_dead_player();
+                                            }
                                         }
                                     }
                                 }
+                            //}
+                            if (bulletEnemy[i].x_ < 1 && bulletEnemy[i].isReadyToMove_ || bulletEnemy[i].x_ > K_WIDTH)
+                            {
+                                bulletEnemy[i].x_ = K_WIDTH + 10;
+                                bulletEnemy[i].y_ = K_HEIGHT + (10 * i);
+                                bulletEnemy[i].isReadyToMove_ = FALSE;
+                                bulletEnemy[i].isAlive_ = FALSE;
+                                Kmove_sprite(SPRITE_BULLET_ENEMY + i, bulletEnemy[i].x_, bulletEnemy[i].y_);
                             }
-                        }
-                        if (bulletEnemy[i].x_ < 1 && bulletEnemy[i].isReadyToMove_ || bulletEnemy[i].x_ > K_WIDTH)
-                        {
-                            bulletEnemy[i].x_ = K_WIDTH + 10;
-                            bulletEnemy[i].isReadyToMove_ = FALSE;
-                            bulletEnemy[i].isAlive_ = FALSE;
                         }
                     }
                 }
@@ -569,10 +529,12 @@ int main() {
                 //////////
                 if (sprite[SPRITE_COWBOY].isAlive_)
                 {
+                    updateMusicGameplay(); //Play the music.
                     draw_sprite_conwboy(sprite[SPRITE_COWBOY].numSprite_, sprite[SPRITE_COWBOY].x_, sprite[SPRITE_COWBOY].y_);
                 }
                 else
                 {
+                    //Preparing screen to clean of sprites.
                     if (clocktimeDeadToGameOver > timeDeadToGameOver)
                     {
                         if (!stopGame)
@@ -589,7 +551,7 @@ int main() {
                             }
                             timerCounter = 0; //Reset music.
                             currentBeat = 0;
-                            playMusic2();
+                            sound_clean_noise();
                         }
                     }
                     else
@@ -684,7 +646,7 @@ int main() {
                                     if (sprite[SPRITE_ENEMY1 + i].timeToCheckCollision_ > totalTimeCheclCollision)
                                     {
                                         sprite[SPRITE_ENEMY1 + i].timeToCheckCollision_ = 0;
-                                        for (j = 0; j < TOTAL_BULLETS; j++)
+                                        for (j = 1; j < TOTAL_BULLETS; j++)
                                         {
                                             if (bulletPlayer[j].isAlive_)
                                             {
@@ -748,10 +710,10 @@ int main() {
                             sprite[SPRITE_ENEMY1 + i].isAlive_ = TRUE;
                             sprite[SPRITE_ENEMY1 + i].isOnScreen_ = FALSE;
                             //Reset bullet.
-                            bulletEnemy[i].isAlive_ = TRUE;
-                            bulletEnemy[i].isReadyToMove_ = FALSE;
+                            //bulletEnemy[i].isAlive_ = TRUE;
+                            //bulletEnemy[i].isReadyToMove_ = FALSE;
                             sprite[SPRITE_ENEMY1 + i].timeToShoot_ = 100;
-                            Kmove_sprite(SPRITE_BULLET_ENEMY + i, bulletEnemy[i].x_, bulletEnemy[i].y_);
+                            //Kmove_sprite(SPRITE_BULLET_ENEMY + i, bulletEnemy[i].x_, bulletEnemy[i].y_);
                             //sound_dead_enemy();
                         }
                     }
@@ -760,7 +722,7 @@ int main() {
                 else
                 {
                     paint_game_over(50,90);
-                    timerMusic2();
+                    updateMusicGameover();
                 }
                 // </editor-fold>
 
@@ -849,7 +811,7 @@ void move_sprite_to(UINT8 numSprite_, UINT8 x_, UINT8 y_)
     }
     if (sprite[SPRITE_COWBOY].x_ > K_WIDTH - 16)
     {
-        sprite[SPRITE_COWBOY].x_ = K_WIDTH - 16;
+        sprite[SPRITE_COWBOY].x_ = K_WIDTH - 17;
         x_ = 0;
     }
     
@@ -1073,6 +1035,11 @@ void paint_game_over(UINT8 x_, UINT8 y_)
     Kmove_sprite(SPRITE_BULLET + 7, x_ + 64, y_); 
 }
 
+void update_hud()
+{
+    
+}
+
 void add_points()
 {
     pointsDigit3++;
@@ -1095,7 +1062,7 @@ void add_points()
 void load_tiles_game()
 {
     int i = 0;
-    Kset_bkg_data(0, 50, bkgdata);
+    Kset_bkg_data(0, 50 + 38, bkgdata);
     
     //Clean garbage memery.
     for (i = 0; i < 17; i++)
@@ -1103,7 +1070,10 @@ void load_tiles_game()
         Kset_bkg_tiles(0,i,50,1,clear);
     }
 
-    Kset_bkg_tiles( 0, 0, 32, 18, background_map);
+    Kset_bkg_tiles(0, 0, 32, 18 - 2, background_map);
+    
+    //HUD
+    Kset_win_tiles(0, 0, 20, 2, hud_map);
 }
 
 void load_tiles_menu()
@@ -1133,7 +1103,6 @@ void sound_dead_enemy()
     NR42_REG = 0xF3U;
     NR43_REG = 100;
     NR44_REG = 0xC0U;
-    NR51_REG |= 0x88;
 }
 
 void sound_dead_player()
@@ -1145,38 +1114,19 @@ void sound_dead_player()
     NR14_REG = 0x87;
 }
 
+void sound_clean_noise()
+{
+    NR41_REG = 1;//0x0FU; //Duration
+    NR42_REG = 1;         //Volumen
+    NR43_REG = 1;         //Tone
+    NR44_REG = 0xC0U;
+    NR51_REG |= 0x88;
+}
+
 void sound_shoot()
 {
     NR41_REG = 0x0FU;
     NR42_REG = 0xF3U;
     NR43_REG = 128;
     NR44_REG = 0xC0U;
-    NR51_REG |= 0x88;
-
-    //Fuego
-    //NR41_REG = 0x0FU;
-    //NR42_REG = 0xF3U;
-    //NR43_REG = 100;
-    //NR44_REG = 0xC0U;
-    //NR51_REG |= 0x88;
-    
-    //Item - Coin
-/*
-    NR21_REG = 0x80U;
-    NR22_REG = 0x73U;
-    NR23_REG = 0x9AU;
-    NR24_REG = 0xC7U;
-    NR51_REG |= 0x22;
-*/
-    
-    //Electricidad
-/*
-    NR52_REG = 0x00;
-    NR52_REG = 0xF8;
-    NR41_REG = 0x0FU;
-    NR42_REG = 0xF3U;
-    NR43_REG = 0x1FU;
-    NR44_REG = 0xC0U;
-    NR51_REG |= 0x88;
-*/
 }

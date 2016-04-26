@@ -738,22 +738,22 @@ const note song_gameplay_ch2[] = {
     {NONE, SILENCE, LONG},
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {NONE, SILENCE, LONG},
-    
-    {SNARE, C4, SHORT},
-    {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {NONE, SILENCE, LONG},
+    
+    {SNARE, C4, SHORT},
+    {NONE, SILENCE, LONG},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     //#################### 1
     {NONE, SILENCE, LONG},
@@ -778,32 +778,32 @@ const note song_gameplay_ch2[] = {
     //#################### 2
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {NONE, SILENCE, LONG},
-    
-    {SNARE, C4, SHORT},
-    {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {NONE, SILENCE, LONG},
+    
+    {SNARE, C4, SHORT},
+    {NONE, SILENCE, LONG},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     //#################### 3
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
@@ -818,32 +818,32 @@ const note song_gameplay_ch2[] = {
     //#################### 4
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {NONE, SILENCE, LONG},
-    
-    {SNARE, C4, SHORT},
-    {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {NONE, SILENCE, LONG},
+    
+    {SNARE, C4, SHORT},
+    {NONE, SILENCE, LONG},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     //#################### 5
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
@@ -898,32 +898,32 @@ const note song_gameplay_ch2[] = {
     //#################### 8 - 13
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {NONE, SILENCE, LONG},
-    
-    {SNARE, C4, SHORT},
-    {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {NONE, SILENCE, LONG},
+    
+    {SNARE, C4, SHORT},
+    {NONE, SILENCE, LONG},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     //#################### 9 - 14
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
@@ -938,32 +938,32 @@ const note song_gameplay_ch2[] = {
     //#################### 10 - 15
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {NONE, SILENCE, LONG},
-    
-    {SNARE, C4, SHORT},
-    {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {NONE, SILENCE, LONG},
+    
+    {SNARE, C4, SHORT},
+    {NONE, SILENCE, LONG},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     //#################### 11 - 16
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
@@ -1038,22 +1038,22 @@ const note song_gameplay_ch2[] = {
     //#################### 15 - 20
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {NONE, SILENCE, LONG},
-    
-    {SNARE, C4, SHORT},
-    {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {NONE, SILENCE, LONG},
+    
+    {SNARE, C4, SHORT},
+    {NONE, SILENCE, LONG},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     //#################### 16 - 21
     {SNARE, F3, SHORT},
@@ -1078,22 +1078,22 @@ const note song_gameplay_ch2[] = {
     //#################### 17 - 22
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {NONE, SILENCE, LONG},
-    
-    {SNARE, C4, SHORT},
-    {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {NONE, SILENCE, LONG},
+    
+    {SNARE, C4, SHORT},
+    {NONE, SILENCE, LONG},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     //#################### 18 - 23
     {SNARE, F3, SHORT},
@@ -1118,22 +1118,22 @@ const note song_gameplay_ch2[] = {
     //#################### 19 - 24
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {SNARE, C5, SHORT},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
-    {NONE, SILENCE, LONG},
-    
-    {SNARE, C4, SHORT},
-    {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     
     {SNARE, C4, SHORT},
     {NONE, SILENCE, LONG},
-    {SNARE, C3, SHORT},
+    {SNARE, C5, SHORT},
+    {NONE, SILENCE, LONG},
+    
+    {SNARE, C4, SHORT},
+    {NONE, SILENCE, LONG},
+    {SNARE, C5, SHORT},
     {NONE, SILENCE, LONG},
     //#################### 20 - 25
     {SNARE, G3, SHORT},

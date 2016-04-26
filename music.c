@@ -5,8 +5,10 @@ to be played as a timer interates through the beats */
 #include "songs_gunsriders.c"
 
 UINT16 currentBeat;
-int timerCounter;
+UINT8 timerCounter;
 UINT8 moreSpeed;
+UINT8 muteChannel1;
+UINT8 muteChannel4;
 
 //function to set sound registers based on notes chosen
 void setNote(note *n){
@@ -59,9 +61,11 @@ void playMusicGameover(){
 }
 
 void playMusicGameplay(){
-    setNote(&song_gameplay_ch1[currentBeat]);
+    if (muteChannel1 == 0)
+        setNote(&song_gameplay_ch1[currentBeat]);
     setNote(&song_gameplay_ch2[currentBeat]);
-    setNote(&song_gameplay_ch4[currentBeat]);
+    if (muteChannel4 == 0)
+        setNote(&song_gameplay_ch4[currentBeat]);
     NR51_REG |= 0x11U; //enable sound on channel 1
 }
 
@@ -102,5 +106,21 @@ void updateMusicGameplay(){
             playMusicGameplay(); //every beat, play the sound for that beat
     }
     timerCounter++;
+    if (muteChannel1 != 0)
+    {
+        muteChannel1++;
+        if (muteChannel1 > 10)
+        {
+            muteChannel1 = 0;
+        }
+    }
+    if (muteChannel4 != 0)
+    {
+        muteChannel4++;
+        if (muteChannel4 > 10)
+        {
+            muteChannel4 = 0;
+        }
+    }
 }
 

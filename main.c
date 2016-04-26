@@ -72,6 +72,7 @@ enum sprites_tiles_8x8 {
 };
 
 enum enum_state {
+    CREDITS,
     MAIN_TITLE,
     GAME_PLAY,
     GAME_PAUSE,
@@ -93,7 +94,7 @@ enum enum_sprites {
 
 enum enum_total_elements {
     TOTAL_BULLETS = 5,
-    TOTAL_ENEMYS = 4
+    TOTAL_ENEMYS = 3 //4
 };
 
 enum enum_first_tile_sprite {
@@ -173,6 +174,8 @@ void add_points();
 
 void update_hud();
 
+void update_enemy_less();
+
 void sound_init();
 
 void sound_clean_noise();
@@ -226,12 +229,14 @@ int main() {
     UINT8 clocktimeDeadToGameOver = 0;
     BOOLEAN stopGame = FALSE;
     
-    UINT8 timeToNewEnemy = 150;
+    UINT8 timeToNewEnemy = 250; //150;
     UINT8 clockToNewEnemy = 0;
     UINT8 countEnemey = 0;
     UINT8 clockToChangeDirection = 60;
     UINT8 counterToChangeDirection = 0;
     BOOLEAN isTimeToChangeDirection = FALSE;
+    UINT8 countTimeReadyShootHUD = 0;
+    UINT8 timeReadyShootHUD = 60;
 
     SPRITES_8x8;
 
@@ -240,7 +245,7 @@ int main() {
     
     load_sprites_data();
 
-    state = MAIN_TITLE; // </editor-fold>
+    state = CREDITS; // </editor-fold>
 
     while (1) {
         
@@ -248,6 +253,20 @@ int main() {
         
         switch(state)
         {
+            case CREDITS:
+                if (!isInited) {
+                    printf("\n \n \n \n    GUNS&RIDERS\n\n   MADE WITH GBDK\n\n CODE: J.M.CLIMENT\n MUSIC: MACHINET\n\n\n NOT PRODUCED BY OR\n UNDER LICENSE FROM\n NINTENTO");
+                    isInited = TRUE;
+                }
+                tempx++;
+                if (tempx > 200)
+                {
+                    tempx = 0;
+                    state = MAIN_TITLE;
+                    isInited = FALSE;
+                    HIDE_BKG;
+                }
+                break;
             // <editor-fold defaultstate="collapsed" desc="MAIN TITLE">
             case MAIN_TITLE:
                 if (!isInited) {
@@ -291,6 +310,9 @@ int main() {
                     
                     timerCounter = 0; //Reset music.
                     currentBeat = 0;
+                    
+                    HUDcountBullets = 5;
+                    HUDcountEnemysLess = 5;
                     
                     //TOCHACO!!!!
                     //Variables.
@@ -371,7 +393,7 @@ int main() {
 
                     //Enemy
                     for (i = 0; i < TOTAL_ENEMYS; i++) {
-                        sprite[SPRITE_ENEMY1 + i].x_ = K_WIDTH + (i * 25) + 10;
+                        sprite[SPRITE_ENEMY1 + i].x_ = K_WIDTH + (i * 10) + 10;
                         sprite[SPRITE_ENEMY1 + i].y_ = get_random_y();
                         sprite[SPRITE_ENEMY1 + i].isAlive_ = TRUE;
                         sprite[SPRITE_ENEMY1 + i].isOnScreen_ = FALSE;
@@ -416,6 +438,18 @@ int main() {
                 //////////////////
                 if (!stopGame)
                 {
+                    //HUD bullets.
+                    if (HUDcountBullets < 5)
+                    {
+                        countTimeReadyShootHUD++;
+                        if (countTimeReadyShootHUD > timeReadyShootHUD)
+                        {
+                            countTimeReadyShootHUD = 0;
+                            HUDcountBullets++;
+                            update_hud();
+                        }
+                    }
+                
                     if (!isPossibleToShoot)
                     {
                         timePauseShoot++;
@@ -600,16 +634,21 @@ int main() {
                         {
                             if (sprite[SPRITE_ENEMY1 + i].isAlive_)
                             {
-                                if (!bulletEnemy[i].isAlive_)
+                                //Shoot enemy bullet.
+                                //if (i%2 == 0)
                                 {
-                                    sprite[SPRITE_ENEMY1 + i].clockToShoot_++;
+                                    if (!bulletEnemy[i].isAlive_)
+                                    {
+                                        sprite[SPRITE_ENEMY1 + i].clockToShoot_++;
+                                    }
+                                    if (sprite[SPRITE_ENEMY1 + i].clockToShoot_ > sprite[SPRITE_ENEMY1 + i].timeToShoot_)
+                                    {
+                                        bulletEnemy[i].isAlive_ = TRUE;
+                                        sprite[SPRITE_ENEMY1 + i].clockToShoot_ = 0;
+                                        sound_shoot();
+                                    }
                                 }
-                                if (sprite[SPRITE_ENEMY1 + i].clockToShoot_ > sprite[SPRITE_ENEMY1 + i].timeToShoot_)
-                                {
-                                    bulletEnemy[i].isAlive_ = TRUE;
-                                    sprite[SPRITE_ENEMY1 + i].clockToShoot_ = 0;
-                                    sound_shoot();
-                                }
+                                //Change direction.
                                 if (isTimeToChangeDirection)
                                 {
                                     sprite[SPRITE_ENEMY1 + i].movingTo_ = get_random_direction();
@@ -709,12 +748,16 @@ int main() {
                             sprite[SPRITE_ENEMY1 + i].y_ = get_random_y();
                             sprite[SPRITE_ENEMY1 + i].isAlive_ = TRUE;
                             sprite[SPRITE_ENEMY1 + i].isOnScreen_ = FALSE;
-                            //Reset bullet.
-                            //bulletEnemy[i].isAlive_ = TRUE;
-                            //bulletEnemy[i].isReadyToMove_ = FALSE;
                             sprite[SPRITE_ENEMY1 + i].timeToShoot_ = 100;
-                            //Kmove_sprite(SPRITE_BULLET_ENEMY + i, bulletEnemy[i].x_, bulletEnemy[i].y_);
-                            //sound_dead_enemy();
+                            //Hud.
+                            HUDcountEnemysLess--;
+                            update_enemy_less();
+                            sound_dead_player();
+                            if (HUDcountEnemysLess == 0)
+                            {
+                                sprite[SPRITE_COWBOY].isAlive_ = FALSE;
+                                //clocktimeDeadToGameOver = timeDeadToGameOver + 1;
+                            }
                         }
                     }
                     isTimeToChangeDirection = FALSE;
@@ -726,9 +769,9 @@ int main() {
                 }
                 // </editor-fold>
 
-                ///////
-                //HUD//
-                ///////
+                //////////
+                //POINTS//
+                //////////
                 paint_points();
 
                 // <editor-fold defaultstate="collapsed" desc="CONTROLS">
@@ -754,7 +797,7 @@ int main() {
                     }
                     if (keys & (J_A) && keyRelease) {
                         keyRelease = FALSE;
-                        if (isPossibleToShoot)
+                        if (isPossibleToShoot && HUDcountBullets != 0)
                         {
                             isPossibleToShoot = FALSE;
                             bulletPlayer[countBulletPlayer].isAlive_ = TRUE;
@@ -764,6 +807,13 @@ int main() {
                             {
                                 countBulletPlayer = 1;
                             }
+                            //HUD
+                            if (HUDcountBullets > 0)
+                            {
+                                HUDcountBullets--;
+                                countTimeReadyShootHUD = 0;
+                            }
+                            update_hud();
                         }
                     }
                     if (!( keys & J_A ))
@@ -1037,7 +1087,108 @@ void paint_game_over(UINT8 x_, UINT8 y_)
 
 void update_hud()
 {
-    
+    switch(HUDcountBullets)
+    {
+        case 5:
+            Kset_win_tiles(5, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(5, 1, 1, 1, hud_bullet_down);
+            Kset_win_tiles(4, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(4, 1, 1, 1, hud_bullet_down);
+            Kset_win_tiles(3, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(3, 1, 1, 1, hud_bullet_down);
+            Kset_win_tiles(2, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(2, 1, 1, 1, hud_bullet_down);
+            Kset_win_tiles(1, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(1, 1, 1, 1, hud_bullet_down);
+            break;
+        case 4:
+            Kset_win_tiles(5, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(5, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(4, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(4, 1, 1, 1, hud_bullet_down);
+            Kset_win_tiles(3, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(3, 1, 1, 1, hud_bullet_down);
+            Kset_win_tiles(2, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(2, 1, 1, 1, hud_bullet_down);
+            Kset_win_tiles(1, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(1, 1, 1, 1, hud_bullet_down);
+            break;
+        case 3:
+            Kset_win_tiles(5, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(5, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(4, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(4, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(3, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(3, 1, 1, 1, hud_bullet_down);
+            Kset_win_tiles(2, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(2, 1, 1, 1, hud_bullet_down);
+            Kset_win_tiles(1, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(1, 1, 1, 1, hud_bullet_down);
+            break;
+        case 2:
+            Kset_win_tiles(5, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(5, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(4, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(4, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(3, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(3, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(2, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(2, 1, 1, 1, hud_bullet_down);
+            Kset_win_tiles(1, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(1, 1, 1, 1, hud_bullet_down);
+            break;
+        case 1:
+            Kset_win_tiles(5, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(5, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(4, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(4, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(3, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(3, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(2, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(2, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(1, 0, 1, 1, hud_bullet_up);
+            Kset_win_tiles(1, 1, 1, 1, hud_bullet_down);
+            break;
+        case 0:
+            Kset_win_tiles(5, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(5, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(4, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(4, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(3, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(3, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(2, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(2, 1, 1, 1, hud_clean_down);
+            Kset_win_tiles(1, 0, 1, 1, hud_clean_up);
+            Kset_win_tiles(1, 1, 1, 1, hud_clean_down);
+            break;
+    }
+}
+
+void update_enemy_less()
+{
+    switch(HUDcountEnemysLess)
+    {
+        case 4:
+            Kset_win_tiles(18, 0, 1, 1, hud_enemy_less_4_up);
+            Kset_win_tiles(18, 1, 1, 1, hud_enemy_less_4_down);
+            break;
+        case 3:
+            Kset_win_tiles(18, 0, 1, 1, hud_enemy_less_3_up);
+            Kset_win_tiles(18, 1, 1, 1, hud_enemy_less_3_down);
+            break;
+        case 2:
+            Kset_win_tiles(18, 0, 1, 1, hud_enemy_less_2_up);
+            Kset_win_tiles(18, 1, 1, 1, hud_enemy_less_2_down);
+            break;
+        case 1:
+            Kset_win_tiles(18, 0, 1, 1, hud_enemy_less_1_up);
+            Kset_win_tiles(18, 1, 1, 1, hud_enemy_less_1_down);
+            break;
+        case 0:
+            Kset_win_tiles(18, 0, 1, 1, hud_enemy_less_0_up);
+            Kset_win_tiles(18, 1, 1, 1, hud_enemy_less_0_down);
+            break;
+    }
 }
 
 void add_points()
@@ -1103,6 +1254,8 @@ void sound_dead_enemy()
     NR42_REG = 0xF3U;
     NR43_REG = 100;
     NR44_REG = 0xC0U;
+    
+    muteChannel4 = 1;
 }
 
 void sound_dead_player()
@@ -1112,6 +1265,8 @@ void sound_dead_player()
     NR12_REG = 0xF3;
     NR13_REG = 0x00;
     NR14_REG = 0x87;
+    
+    muteChannel1 = 1;
 }
 
 void sound_clean_noise()
@@ -1129,4 +1284,6 @@ void sound_shoot()
     NR42_REG = 0xF3U;
     NR43_REG = 128;
     NR44_REG = 0xC0U;
+    
+    muteChannel4 = 1;
 }

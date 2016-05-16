@@ -1,8 +1,6 @@
-/* Here's a look at how I created a quick music player for use with GBDK.
-It basically defines how to play a note, and then stores an array of notes
-to be played as a timer interates through the beats */
+/*THIS IS THE SOUND ENGINE*/
 
-#include "songs_gunsriders.c"
+#include "songs_gunsriders.c" //The songs.
 
 UINT16 currentBeat;
 UINT8 timerCounter;
@@ -38,9 +36,9 @@ void setNote(note *n){
 
             break;
             case CYMBAL:
-                NR41_REG = 30;//0x0FU; //Duration
-                NR42_REG = 55;         //Volumen
-                NR43_REG = 50;         //Tone
+                NR41_REG = 30;
+                NR42_REG = 55;     
+                NR43_REG = 50;         
                 NR44_REG = 0xC0U;
                 NR51_REG |= 0x88;
             break;
@@ -51,13 +49,13 @@ void playMusicMenu(){
     setNote(&song_menu_ch1[currentBeat]);
     setNote(&song_menu_ch2[currentBeat]);
     setNote(&song_menu_ch4[currentBeat]);
-    NR51_REG |= 0x11U; //enable sound on channel 1
+    NR51_REG |= 0x11U;
 }
 
 void playMusicGameover(){
     setNote(&song_gameover_ch1[currentBeat]);
     setNote(&song_gameover_ch2[currentBeat]);
-    NR51_REG |= 0x11U; //enable sound on channel 1
+    NR51_REG |= 0x11U;
 }
 
 void playMusicGameplay(){
@@ -66,30 +64,29 @@ void playMusicGameplay(){
     setNote(&song_gameplay_ch2[currentBeat]);
     if (muteChannel4 == 0)
         setNote(&song_gameplay_ch4[currentBeat]);
-    NR51_REG |= 0x11U; //enable sound on channel 1
+    NR51_REG |= 0x11U;
 }
 
-//Timer function gets called 16 times a second
 void updateMusicMenu(){
-    if (timerCounter >= 7){ //every 4 ticks is a beat, or 4 beats per second
+    if (timerCounter >= 7){
             timerCounter = 0;
             currentBeat = currentBeat == 60 ? 0 : currentBeat+1;
-            playMusicMenu(); //every beat, play the sound for that beat
+            playMusicMenu();
     }
     timerCounter++;
 }
 
 void updateMusicGameover(){
-    if (timerCounter >= 7 && currentBeat <= 25){ //every 4 ticks is a beat, or 4 beats per second
+    if (timerCounter >= 7 && currentBeat <= 25){
             timerCounter = 0;
             currentBeat = currentBeat == 25 ? 0 : currentBeat+1;
-            playMusicGameover(); //every beat, play the sound for that beat
+            playMusicGameover();
     }
     timerCounter++;
 }
 
 void updateMusicGameplay(){
-    if (timerCounter >= 7 - moreSpeed){ //every 4 ticks is a beat, or 4 beats per second
+    if (timerCounter >= 7 - moreSpeed){
             timerCounter = 0;
             if (currentBeat < 352)
             {
@@ -103,7 +100,7 @@ void updateMusicGameplay(){
                     moreSpeed++;
                 }
             }
-            playMusicGameplay(); //every beat, play the sound for that beat
+            playMusicGameplay();
     }
     timerCounter++;
     if (muteChannel1 != 0)
